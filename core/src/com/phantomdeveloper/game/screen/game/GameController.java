@@ -39,8 +39,11 @@ public class GameController {
     private int displayScore;
     private Pool<Obstacle> obstaclePool;
 
+    private boolean isPaused = false;
+
     private Sound hit;
     private Music music;
+    private float musicPosition;
 
     private final ObstacleGame game;
     private final AssetManager assetManager;
@@ -85,6 +88,13 @@ public class GameController {
 
     //==public method==
     public void update(float delta) {
+        if(isPaused()){
+            music.pause();
+            return;
+        }else {
+            music.play();
+        }
+
         if (isGameOver()) {
             return;
         }
@@ -115,6 +125,14 @@ public class GameController {
 
     public int getLives() {
         return lives;
+    }
+
+    public boolean isPaused() {
+        return isPaused;
+    }
+
+    public void setPaused(boolean paused) {
+        isPaused = paused;
     }
 
     public Array<Obstacle> getObstacles() {

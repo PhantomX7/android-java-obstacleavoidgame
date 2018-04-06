@@ -11,6 +11,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -21,6 +26,7 @@ import com.phantomdeveloper.game.config.GameConfig;
 import com.phantomdeveloper.game.entity.Background;
 import com.phantomdeveloper.game.entity.Obstacle;
 import com.phantomdeveloper.game.entity.Player;
+import com.phantomdeveloper.game.screen.menu.MenuScreenBase;
 import com.phantomdeveloper.game.util.GdxUtils;
 import com.phantomdeveloper.game.util.ViewportUtils;
 import com.phantomdeveloper.game.util.debug.DebugCameraController;
@@ -29,7 +35,7 @@ import com.phantomdeveloper.game.util.debug.DebugCameraController;
  * Created by Phantom on 2/8/2018.
  */
 
-public class GameRenderer implements Disposable {
+public class GameRenderer extends MenuScreenBase implements Disposable {
 
     //==attributes==
     private OrthographicCamera camera;
@@ -48,14 +54,22 @@ public class GameRenderer implements Disposable {
 
     private TextureRegion playerTexture;
     private TextureRegion obstacleTexture;
+    private TextureRegion obstacle2Texture;
     private TextureRegion backgroundTexture;
 
     //==constructor==
     public GameRenderer(SpriteBatch batch, AssetManager assetManager, GameController controller) {
+
+        super(assetManager);
         this.batch = batch;
         this.assetManager = assetManager;
         this.controller = controller;
         init();
+    }
+
+    @Override
+    public void show() {
+        super.show();
     }
 
     //==init==
@@ -76,37 +90,77 @@ public class GameRenderer implements Disposable {
 
         playerTexture = gamePlayAtlas.findRegion(RegionNames.PLAYER);
         obstacleTexture = gamePlayAtlas.findRegion(RegionNames.OBSTACLE);
+        obstacle2Texture = gamePlayAtlas.findRegion(RegionNames.OBSTACLE2);
         backgroundTexture = gamePlayAtlas.findRegion(RegionNames.BACKGROUND);
+
+        Stage stage = new Stage(hudViewport, batch);
+
+        Gdx.input.setInputProcessor(stage);
+
+        stage.addActor(createUi());
+        super.stage = stage;
     }
 
     //==public method==
     public void render(float delta) {
+
+
+//        return;
         batch.totalRenderCalls = 0;
 
         debugCameraController.handleDebugInput(delta);
         debugCameraController.applyTo(camera);
 
-        if (Gdx.input.isTouched() && !controller.isGameOver()) {
-            Vector2 screenTouch = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-            Vector2 worldTouch = viewport.unproject(new Vector2(screenTouch));
+        if (!controller.isPaused()) {
+            if (Gdx.input.isTouched() && !controller.isGameOver()) {
+                Vector2 screenTouch = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+                Vector2 worldTouch = viewport.unproject(new Vector2(screenTouch));
 
-            Player player = controller.getPlayer();
-            worldTouch.x = MathUtils.clamp(worldTouch.x, player.getWidth() / 2, GameConfig.WORLD_WIDTH - player.getWidth() / 2);
-            player.setX(worldTouch.x - player.getWidth() / 2);
+                if (worldTouch.y < GameConfig.WORLD_WIDTH) {
+                    Player player = controller.getPlayer();
+                    worldTouch.x = MathUtils.clamp(worldTouch.x, player.getWidth() / 2, GameConfig.WORLD_WIDTH - player.getWidth() / 2);
+                    player.setX(worldTouch.x - player.getWidth() / 2);
+                }
+            }
         }
 
         //clearScreen
         GdxUtils.clearScreen();
 
         renderGameplay();
+        super.stage.act();
+        super.stage.draw();
 
         //render ui/hud
         renderUi();
 
+
         //render debug graphics
-        renderDebug();
+//        renderDebug();
 
         //System.out.println("total render calls ="+batch.totalRenderCalls);
+    }
+
+    @Override
+    protected Actor createUi() {
+
+        Skin uiSkin = assetManager.get(AssetDescriptors.UI_SKIN);
+
+        String pauseText = controller.isPaused() ? "RESUME" : "PAUSE";
+        TextButton pauseButton = new TextButton(pauseText, uiSkin);
+        pauseButton.setTransform(true);
+        pauseButton.setScale(0.5f);
+
+        pauseButton.setPosition(15, GameConfig.HUD_HEIGHT - pauseButton.getHeight() - 15);
+
+        pauseButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                controller.setPaused(!controller.isPaused());
+            }
+        });
+
+        return pauseButton;
     }
 
     public void resize(int width, int height) {
@@ -142,7 +196,7 @@ public class GameRenderer implements Disposable {
         for (Obstacle obstacle : controller.getObstacles()) {
             batch.draw(obstacleTexture,
                     obstacle.getX(), obstacle.getY(),
-                    obstacle.getWidth(), obstacle.getHeight());
+                    obstacle.getWidth(), obstacle.getHeight() * 1.5f);
         }
 
         batch.end();
@@ -166,6 +220,13 @@ public class GameRenderer implements Disposable {
         font.draw(batch, scorText,
                 GameConfig.HUD_WIDTH - layout.width - 20,
                 GameConfig.HUD_HEIGHT - layout.height);
+
+
+//        layout.setText(font, pauseText);
+
+//        font.draw(batch, pauseText,
+//                20,
+//                GameConfig.HUD_HEIGHT - 2 * layout.height - 10);
 
         batch.end();
     }

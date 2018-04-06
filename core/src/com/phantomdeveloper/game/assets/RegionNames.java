@@ -7,8 +7,9 @@ package com.phantomdeveloper.game.assets;
 public class RegionNames {
 
     //== gameplay atlas ==
-    public static final String BACKGROUND = "background";
-    public static final String OBSTACLE = "obstacle";
+    public static final String BACKGROUND = "background1";
+    public static final String OBSTACLE = "meteor";
+    public static final String OBSTACLE2 = "meteor";
     public static final String PLAYER = "player";
 
     //== ui atlas ==

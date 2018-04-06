@@ -19,7 +19,7 @@ public class GameConfig {
     public static final float WORLD_CENTER_Y = WORLD_HEIGHT / 2f; // world units
 
     public static final float MAX_PLAYER_X_SPEED = 0.25f; // max player speed
-    public static final float OBSTACLE_SPAWN_TIME = 0.25f; //spawn every interval in second
+    public static final float OBSTACLE_SPAWN_TIME = 0.35f; //spawn every interval in second
     public static final float SCORE_MAX_TIME = 0.25f; // add score every time in second
 
     public static final int LIVES_START = 3;//live on start

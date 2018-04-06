@@ -20,7 +20,12 @@ public abstract class MenuScreenBase extends ScreenAdapter {
     protected final AssetManager assetManager;
 
     private Viewport viewport;
-    private Stage stage;
+    protected Stage stage;
+
+    public MenuScreenBase(AssetManager assetManager) {
+        this.assetManager = assetManager;
+        this.game=null;
+    }
 
     public MenuScreenBase(ObstacleGame game) {
         this.game = game;
