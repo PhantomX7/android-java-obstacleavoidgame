@@ -240,6 +240,9 @@ public class GameController {
             score += 1;
             scoreTimer = 0.0f;
         }
+        if(score%150==0){
+            lives++;
+        }
     }
 
     private void updateDisplayScore(float delta) {

@@ -54,7 +54,7 @@ public class MenuScreen extends MenuScreenBase {
         });
 
         //options button
-        TextButton optionsButton = new TextButton("OPTIONS", uiSkin);
+        TextButton optionsButton = new TextButton("DIFFICUTY", uiSkin);
         optionsButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
